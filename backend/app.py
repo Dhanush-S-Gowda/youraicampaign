@@ -20,7 +20,10 @@ load_dotenv()
 app = Flask(__name__)
 
 # Initialize tools
-search_tool = SerperDevTool(api_key=os.environ["SERPER_API_KEY"])
+serper_api_key = os.getenv("SERPER_API_KEY")
+if not serper_api_key:
+    raise RuntimeError("Missing SERPER_API_KEY in environment variables")
+search_tool = SerperDevTool(api_key=serper_api_key)
 scrape_tool = ScrapeWebsiteTool()
 
 # Load prompts from YAML file
