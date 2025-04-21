@@ -1,5 +1,4 @@
 """Flask application for AI-powered email outreach using CrewAI.
-
 This flask module provides endpoints for generating and sending personalized outreach emails
 using AI agents based on CrewAI framework.
 """
