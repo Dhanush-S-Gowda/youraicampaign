@@ -1,0 +1,9 @@
+crewai
+crewai-tools
+flask
+google-generativeai
+mailjet-rest
+markdown2
+PyYAML
+pytest
+python-dotenv
