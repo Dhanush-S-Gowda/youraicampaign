@@ -313,7 +313,7 @@ const CampaignDetails = () => {
         setProspects(
           prospects.map((p) =>
             p.id === prospect.id
-              ? { ...p, email_data: generatedEmail.email_record }
+              ? { ...p, email_data: generatedEmail.email_record as Email }
               : p
           )
         );
