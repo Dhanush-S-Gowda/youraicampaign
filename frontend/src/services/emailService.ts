@@ -26,7 +26,7 @@ export interface EmailGenerationResponse {
   prospect_company_name: string;
   subject: string;
   body: string;
-  email_record?: any;
+  email_record?: unknown;
 }
 
 // Types for email sending request
@@ -107,9 +107,9 @@ export const generateEmail = async (data: EmailGenerationRequest): Promise<Email
     }
     
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating email:', error);
-    toast.error(`Error generating email: ${error.message}`);
+    toast.error(`Error generating email: ${error}`);
     throw error;
   }
 };
@@ -170,9 +170,9 @@ export const sendEmail = async (data: EmailSendRequest): Promise<{ message: stri
     }
     
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending email:', error);
-    toast.error(`Error sending email: ${error.message}`);
+    toast.error(`Error sending email: ${error}`);
     throw error;
   }
 };
@@ -237,7 +237,7 @@ export const deleteCampaignWithRelated = async (campaignId: string): Promise<voi
     
     console.log("Campaign deleted successfully");
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in deleteCampaignWithRelated:", error);
     throw error;
   }

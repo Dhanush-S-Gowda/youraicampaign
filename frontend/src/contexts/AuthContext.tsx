@@ -10,11 +10,11 @@ type AuthContextType = {
   profile: Profile | null;
   signUp: (email: string, password: string, metadata: { name: string; company_description: string }) => Promise<{
     error: Error | null;
-    data: any | null;
+    data: unknown | null;
   }>;
   signIn: (email: string, password: string) => Promise<{
     error: Error | null;
-    data: any | null;
+    data: unknown | null;
   }>;
   signOut: () => Promise<void>;
   loading: boolean;

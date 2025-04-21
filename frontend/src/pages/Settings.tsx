@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +22,14 @@ import { Upload, Key, Lock, User } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Profile, UserApiKeys } from "@/types/database.types";
 
 const profileSchema = z.object({
@@ -29,14 +42,20 @@ const apiKeysSchema = z.object({
   mailjet_secret_key: z.string().min(1, "Secret Key is required"),
 });
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 const Settings = () => {
   const { user, refreshProfile } = useAuth();
@@ -74,37 +93,37 @@ const Settings = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
-      
+
       try {
         setLoading(true);
-        
+
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
           .single();
-          
+
         if (profileError) throw profileError;
-        
+
         setProfile(profileData as Profile);
-        
+
         if (profileData) {
           profileForm.reset({
             name: profileData.name || "",
             company_description: profileData.company_description || "",
           });
         }
-        
+
         try {
           const { data: apiKeysData, error: apiKeysError } = await supabase
             .from("user_api_keys")
             .select("*")
             .eq("user_id", user.id)
             .single();
-            
+
           if (!apiKeysError) {
             setApiKeys(apiKeysData as UserApiKeys);
-            
+
             if (apiKeysData) {
               apiKeysForm.reset({
                 mailjet_api_key: apiKeysData.mailjet_api_key || "",
@@ -115,455 +134,505 @@ const Settings = () => {
         } catch (apiKeyError) {
           console.error("Error fetching API keys:", apiKeyError);
         }
-        
-      } catch (error: any) {
-        console.error("Error fetching user data:", error);
-        toast.error("Failed to load user data");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Error fetching user data:", error);
+          toast.error("Failed to load user data");
+        } else {
+          toast.error("An unknown error occurred.");
+          console.error("An unknown error occurred:", error);
+        }
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchUserData();
   }, [user]);
 
   const onSubmitProfile = async (values: z.infer<typeof profileSchema>) => {
     try {
       if (!user) return;
-      
+
       const { error } = await supabase
         .from("profiles")
         .update({
           name: values.name,
           company_description: values.company_description,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
-        
+
       if (error) throw error;
-      
+
       toast.success("Profile updated successfully");
-      
+
       if (profile) {
         setProfile({
           ...profile,
           name: values.name,
           company_description: values.company_description,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         });
       }
-    } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
-    }
-  };
-
-  const onSubmitApiKeys = async (values: z.infer<typeof apiKeysSchema>) => {
-    try {
-      if (!user) return;
-      
-      if (apiKeys) {
-        const { error } = await supabase
-          .from("user_api_keys")
-          .update({
-            mailjet_api_key: values.mailjet_api_key,
-            mailjet_secret_key: values.mailjet_secret_key,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", apiKeys.id);
-          
-        if (error) throw error;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error updating profile:", error);
+        toast.error("Failed to update profile");
       } else {
-        const { error } = await supabase
-          .from("user_api_keys")
-          .insert({
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
+    }
+
+    const onSubmitApiKeys = async (values: z.infer<typeof apiKeysSchema>) => {
+      try {
+        if (!user) return;
+
+        if (apiKeys) {
+          const { error } = await supabase
+            .from("user_api_keys")
+            .update({
+              mailjet_api_key: values.mailjet_api_key,
+              mailjet_secret_key: values.mailjet_secret_key,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", apiKeys.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from("user_api_keys").insert({
             user_id: user.id,
             mailjet_api_key: values.mailjet_api_key,
             mailjet_secret_key: values.mailjet_secret_key,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           });
-          
-        if (error) throw error;
-        
-        try {
-          const { data, error: fetchError } = await supabase
-            .from("user_api_keys")
-            .select("*")
-            .eq("user_id", user.id)
-            .single();
-            
-          if (!fetchError && data) {
-            setApiKeys(data as UserApiKeys);
+
+          if (error) throw error;
+
+          try {
+            const { data, error: fetchError } = await supabase
+              .from("user_api_keys")
+              .select("*")
+              .eq("user_id", user.id)
+              .single();
+
+            if (!fetchError && data) {
+              setApiKeys(data as UserApiKeys);
+            }
+          } catch (fetchError) {
+            console.error("Error fetching new API keys:", fetchError);
           }
-        } catch (fetchError) {
-          console.error("Error fetching new API keys:", fetchError);
+        }
+
+        toast.success("API keys saved successfully");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Error saving API keys:", error);
+          toast.error("Failed to save API keys");
+        } else {
+          toast.error("An unknown error occurred.");
+          console.error("An unknown error occurred:", error);
         }
       }
-      
-      toast.success("API keys saved successfully");
-    } catch (error: any) {
-      console.error("Error saving API keys:", error);
-      toast.error("Failed to save API keys");
-    }
-  };
 
-  const onSubmitPassword = async (values: z.infer<typeof passwordSchema>) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: values.newPassword,
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Password updated successfully");
-      passwordForm.reset();
-    } catch (error: any) {
-      console.error("Error updating password:", error);
-      toast.error(error.message || "Failed to update password");
-    }
-  };
+      const onSubmitPassword = async (
+        values: z.infer<typeof passwordSchema>
+      ) => {
+        try {
+          const { error } = await supabase.auth.updateUser({
+            password: values.newPassword,
+          });
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    
-    try {
-      setUploadingPhoto(true);
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-      
-      console.log("Uploading file:", filePath);
-      
-      const { error: uploadError, data } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-        
-      if (uploadError) {
-        console.error("Upload error:", uploadError);
-        throw uploadError;
-      }
-      
-      console.log("Upload successful:", data);
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(filePath);
-      
-      console.log("Public URL:", publicUrl);
-      
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          profile_photo: publicUrl,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-        
-      if (updateError) {
-        console.error("Profile update error:", updateError);
-        throw updateError;
-      }
-      
-      if (profile) {
-        setProfile({
-          ...profile,
-          profile_photo: publicUrl,
-          updated_at: new Date().toISOString()
-        });
-      }
-      
-      await refreshProfile();
-      
-      toast.success("Profile photo updated successfully");
-    } catch (error: any) {
-      console.error("Error uploading photo:", error);
-      toast.error("Failed to upload profile photo: " + (error.message || error.error_description || "Unknown error"));
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
+          if (error) throw error;
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
+          toast.success("Password updated successfully");
+          passwordForm.reset();
+        } catch (error: unknown) {
+          console.error("Error updating password:", error);
+          toast.error("Failed to update password");
+        }
+      };
 
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow pt-24 pb-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Manage your account settings and preferences
-            </p>
+      const handlePhotoUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>
+      ) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        try {
+          setUploadingPhoto(true);
+
+          const fileExt = file.name.split(".").pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `${user.id}/${fileName}`;
+
+          console.log("Uploading file:", filePath);
+
+          const { error: uploadError, data } = await supabase.storage
+            .from("profiles")
+            .upload(filePath, file, {
+              cacheControl: "3600",
+              upsert: true,
+            });
+
+          if (uploadError) {
+            console.error("Upload error:", uploadError);
+            throw uploadError;
+          }
+
+          console.log("Upload successful:", data);
+
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("profiles").getPublicUrl(filePath);
+
+          console.log("Public URL:", publicUrl);
+
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({
+              profile_photo: publicUrl,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
+
+          if (updateError) {
+            console.error("Profile update error:", updateError);
+            throw updateError;
+          }
+
+          if (profile) {
+            setProfile({
+              ...profile,
+              profile_photo: publicUrl,
+              updated_at: new Date().toISOString(),
+            });
+          }
+
+          await refreshProfile();
+
+          toast.success("Profile photo updated successfully");
+        } catch (error: unknown) {
+          console.error("Error uploading photo:", error);
+          toast.error("Failed to upload profile photo: " + "Unknown error");
+        } finally {
+          setUploadingPhoto(false);
+        }
+      };
+
+      if (loading) {
+        return (
+          <div className="flex min-h-screen items-center justify-center">
+            <Spinner size="lg" />
           </div>
-          
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid grid-cols-3 w-full max-w-md">
-              <TabsTrigger value="profile" className="flex items-center space-x-2">
-                <User size={16} />
-                <span>Profile</span>
-              </TabsTrigger>
-              <TabsTrigger value="api-keys" className="flex items-center space-x-2">
-                <Key size={16} />
-                <span>API Keys</span>
-              </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center space-x-2">
-                <Lock size={16} />
-                <span>Security</span>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="profile">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Photo</CardTitle>
-                    <CardDescription>
-                      Update your profile picture
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center">
-                    <Avatar className="h-32 w-32 mb-4">
-                      {profile?.profile_photo ? (
-                        <AvatarImage src={profile.profile_photo} alt={profile.name || "User"} />
-                      ) : (
-                        <AvatarFallback className="text-2xl">
-                          {profile?.name?.charAt(0) || user?.email?.charAt(0).toUpperCase() || "U"}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    
-                    <Label htmlFor="photo-upload" className="cursor-pointer">
-                      <div className="flex items-center space-x-2 bg-brand-purple text-white px-4 py-2 rounded-md hover:bg-brand-purple/90">
-                        <Upload size={16} />
-                        <span>{uploadingPhoto ? "Uploading..." : "Upload Photo"}</span>
-                      </div>
-                      <input
-                        id="photo-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhotoUpload}
-                        disabled={uploadingPhoto}
-                      />
-                    </Label>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>
-                      Update your personal details
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...profileForm}>
-                      <form onSubmit={profileForm.handleSubmit(onSubmitProfile)} className="space-y-4">
-                        <FormField
-                          control={profileForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your name" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={profileForm.control}
-                          name="company_description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Company Description</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Describe your company" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <Button 
-                          type="submit" 
-                          className="w-full bg-brand-purple hover:bg-brand-purple/90"
-                          disabled={profileForm.formState.isSubmitting}
-                        >
-                          {profileForm.formState.isSubmitting ? (
-                            <Spinner className="mr-2" />
-                          ) : null}
-                          Save Changes
-                        </Button>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="api-keys">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Mailjet API Configuration</CardTitle>
-                  <CardDescription>
-                    Configure your Mailjet API keys to send emails through your campaigns
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...apiKeysForm}>
-                    <form onSubmit={apiKeysForm.handleSubmit(onSubmitApiKeys)} className="space-y-4">
-                      <FormField
-                        control={apiKeysForm.control}
-                        name="mailjet_api_key"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Mailjet API Key</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter Mailjet API key" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={apiKeysForm.control}
-                        name="mailjet_secret_key"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Mailjet Secret Key</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter Mailjet secret key" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-brand-purple hover:bg-brand-purple/90"
-                        disabled={apiKeysForm.formState.isSubmitting}
-                      >
-                        {apiKeysForm.formState.isSubmitting ? (
-                          <Spinner className="mr-2" />
-                        ) : null}
-                        Save API Keys
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Change Password</CardTitle>
-                  <CardDescription>
-                    Update your account password
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...passwordForm}>
-                    <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)} className="space-y-4">
-                      <FormField
-                        control={passwordForm.control}
-                        name="currentPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Current Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter current password" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={passwordForm.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Enter new password" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={passwordForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm New Password</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="password" 
-                                placeholder="Confirm new password" 
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-brand-purple hover:bg-brand-purple/90"
-                        disabled={passwordForm.formState.isSubmitting}
-                      >
-                        {passwordForm.formState.isSubmitting ? (
-                          <Spinner className="mr-2" />
-                        ) : null}
-                        Update Password
-                      </Button>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
-  );
-};
+        );
+      }
 
+      return (
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
+
+          <main className="flex-grow pt-24 pb-16 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="mb-8">
+                <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  Manage your account settings and preferences
+                </p>
+              </div>
+
+              <Tabs defaultValue="profile" className="space-y-6">
+                <TabsList className="grid grid-cols-3 w-full max-w-md">
+                  <TabsTrigger
+                    value="profile"
+                    className="flex items-center space-x-2"
+                  >
+                    <User size={16} />
+                    <span>Profile</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="api-keys"
+                    className="flex items-center space-x-2"
+                  >
+                    <Key size={16} />
+                    <span>API Keys</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="security"
+                    className="flex items-center space-x-2"
+                  >
+                    <Lock size={16} />
+                    <span>Security</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="profile">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile Photo</CardTitle>
+                        <CardDescription>
+                          Update your profile picture
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex flex-col items-center">
+                        <Avatar className="h-32 w-32 mb-4">
+                          {profile?.profile_photo ? (
+                            <AvatarImage
+                              src={profile.profile_photo}
+                              alt={profile.name || "User"}
+                            />
+                          ) : (
+                            <AvatarFallback className="text-2xl">
+                              {profile?.name?.charAt(0) ||
+                                user?.email?.charAt(0).toUpperCase() ||
+                                "U"}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+
+                        <Label
+                          htmlFor="photo-upload"
+                          className="cursor-pointer"
+                        >
+                          <div className="flex items-center space-x-2 bg-brand-purple text-white px-4 py-2 rounded-md hover:bg-brand-purple/90">
+                            <Upload size={16} />
+                            <span>
+                              {uploadingPhoto ? "Uploading..." : "Upload Photo"}
+                            </span>
+                          </div>
+                          <input
+                            id="photo-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handlePhotoUpload}
+                            disabled={uploadingPhoto}
+                          />
+                        </Label>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Personal Information</CardTitle>
+                        <CardDescription>
+                          Update your personal details
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Form {...profileForm}>
+                          <form
+                            onSubmit={profileForm.handleSubmit(onSubmitProfile)}
+                            className="space-y-4"
+                          >
+                            <FormField
+                              control={profileForm.control}
+                              name="name"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Name</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Your name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={profileForm.control}
+                              name="company_description"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Company Description</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Describe your company"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <Button
+                              type="submit"
+                              className="w-full bg-brand-purple hover:bg-brand-purple/90"
+                              disabled={profileForm.formState.isSubmitting}
+                            >
+                              {profileForm.formState.isSubmitting ? (
+                                <Spinner className="mr-2" />
+                              ) : null}
+                              Save Changes
+                            </Button>
+                          </form>
+                        </Form>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="api-keys">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Mailjet API Configuration</CardTitle>
+                      <CardDescription>
+                        Configure your Mailjet API keys to send emails through
+                        your campaigns
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Form {...apiKeysForm}>
+                        <form
+                          onSubmit={apiKeysForm.handleSubmit(onSubmitApiKeys)}
+                          className="space-y-4"
+                        >
+                          <FormField
+                            control={apiKeysForm.control}
+                            name="mailjet_api_key"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mailjet API Key</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Enter Mailjet API key"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={apiKeysForm.control}
+                            name="mailjet_secret_key"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mailjet Secret Key</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Enter Mailjet secret key"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full bg-brand-purple hover:bg-brand-purple/90"
+                            disabled={apiKeysForm.formState.isSubmitting}
+                          >
+                            {apiKeysForm.formState.isSubmitting ? (
+                              <Spinner className="mr-2" />
+                            ) : null}
+                            Save API Keys
+                          </Button>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="security">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Change Password</CardTitle>
+                      <CardDescription>
+                        Update your account password
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Form {...passwordForm}>
+                        <form
+                          onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
+                          className="space-y-4"
+                        >
+                          <FormField
+                            control={passwordForm.control}
+                            name="currentPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Current Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Enter current password"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="newPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Enter new password"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={passwordForm.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Confirm New Password</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="password"
+                                    placeholder="Confirm new password"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <Button
+                            type="submit"
+                            className="w-full bg-brand-purple hover:bg-brand-purple/90"
+                            disabled={passwordForm.formState.isSubmitting}
+                          >
+                            {passwordForm.formState.isSubmitting ? (
+                              <Spinner className="mr-2" />
+                            ) : null}
+                            Update Password
+                          </Button>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </main>
+
+          <Footer />
+        </div>
+      );
+    };
+  };
+};
 export default Settings;

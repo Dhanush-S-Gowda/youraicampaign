@@ -62,9 +62,14 @@ const NewCampaign = () => {
       if (data) {
         navigate(`/campaigns/${data.id}`);
       }
-    } catch (error: any) {
-      toast.error("Error creating campaign: " + error.message);
-      console.error("Error creating campaign:", error);
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error("Error creating campaign: " + error.message);
+        console.error("Error creating campaign:", error);
+      } else {
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }

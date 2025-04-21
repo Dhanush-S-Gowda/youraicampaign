@@ -121,9 +121,14 @@ export default function ImportProspectsSheet({
           throw new Error(`CSV parsing error: ${error.message}`);
         }
       });
-    } catch (error: any) {
-      toast.error(`Import failed: ${error.message}`);
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(`Import failed: ${error.message}`);
       console.error("Import error:", error);
+      } else {
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
     } finally {
       setIsImporting(false);
     }

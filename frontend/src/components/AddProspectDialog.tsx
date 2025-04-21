@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,65 +21,74 @@ interface AddProspectDialogProps {
   onProspectAdded: () => void;
 }
 
-export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: AddProspectDialogProps) {
+export default function AddProspectDialog({
+  isOpen,
+  onClose,
+  onProspectAdded,
+}: AddProspectDialogProps) {
   const { id: campaignId } = useParams<{ id: string }>();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company_name: "",
-    role: ""
+    role: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!campaignId) {
       toast.error("Campaign ID is missing");
       return;
     }
-    
+
     if (!formData.name || !formData.email || !formData.company_name) {
       toast.error("Please fill in all required fields");
       return;
     }
-    
+
     try {
       setIsSubmitting(true);
-      
+
       const { data, error } = await supabase
-        .from('prospects')
+        .from("prospects")
         .insert({
           campaign_id: campaignId,
           name: formData.name,
           email: formData.email,
           company_name: formData.company_name,
-          role: formData.role || null
+          role: formData.role || null,
         })
         .select()
         .single();
-        
+
       if (error) throw error;
-      
+
       toast.success("Prospect added successfully");
       onProspectAdded();
       onClose();
-      
+
       // Reset form
       setFormData({
         name: "",
         email: "",
         company_name: "",
-        role: ""
+        role: "",
       });
-    } catch (error: any) {
-      toast.error(`Error adding prospect: ${error.message}`);
-      console.error("Error adding prospect:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(`Error adding prospect: ${error.message}`);
+        console.error("Error adding prospect:", error);
+      } else {
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -95,11 +103,13 @@ export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: 
             Add a new prospect to your campaign. Fill in the details below.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="name" className="required">Contact Name</Label>
-            <Input 
+            <Label htmlFor="name" className="required">
+              Contact Name
+            </Label>
+            <Input
               id="name"
               name="name"
               placeholder="John Doe"
@@ -108,10 +118,12 @@ export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: 
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="email" className="required">Email</Label>
-            <Input 
+            <Label htmlFor="email" className="required">
+              Email
+            </Label>
+            <Input
               id="email"
               name="email"
               type="email"
@@ -121,10 +133,12 @@ export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: 
               required
             />
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="company_name" className="required">Company Name</Label>
-            <Input 
+            <Label htmlFor="company_name" className="required">
+              Company Name
+            </Label>
+            <Input
               id="company_name"
               name="company_name"
               placeholder="Acme Inc."
@@ -133,10 +147,10 @@ export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: 
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="role">Role/Position</Label>
-            <Input 
+            <Input
               id="role"
               name="role"
               placeholder="CEO, CTO, Marketing Director, etc."
@@ -144,12 +158,16 @@ export default function AddProspectDialog({ isOpen, onClose, onProspectAdded }: 
               onChange={handleChange}
             />
           </div>
-          
+
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-brand-purple hover:bg-brand-purple/90">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-brand-purple hover:bg-brand-purple/90"
+            >
               {isSubmitting ? <Spinner size="sm" className="mr-2" /> : null}
               {isSubmitting ? "Adding..." : "Add Prospect"}
             </Button>

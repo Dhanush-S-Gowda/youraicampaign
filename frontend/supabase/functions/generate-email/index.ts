@@ -90,11 +90,11 @@ serve(async (req) => {
         };
         
         console.log("Using fallback email due to external API error");
-        var generatedEmail = fallbackEmail;
+        const generatedEmail = fallbackEmail;
       } else {
         const generatedEmailData = await externalApiResponse.json();
         console.log("Email generated successfully from external API:", generatedEmailData);
-        var generatedEmail = generatedEmailData;
+        const generatedEmail = generatedEmailData;
       }
 
       // Prepare the response in the expected format

@@ -54,9 +54,14 @@ const SignupForm = () => {
         
         toast.success("Logged in successfully! Redirecting to dashboard...");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Authentication failed. Please try again.");
-    } finally {
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Authentication failed. Please try again.");
+      } else {
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
+    }finally {
       setIsLoading(false);
     }
   };

@@ -70,9 +70,14 @@ const EditCampaignDialog = ({
       toast.success("Campaign updated successfully!");
       onCampaignUpdated(data as Campaign);
       onClose();
-    } catch (error: any) {
-      toast.error("Error updating campaign: " + error.message);
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error("Error updating campaign: " + error.message);
       console.error("Error updating campaign:", error);
+      } else {
+        toast.error("An unknown error occurred.");
+        console.error("An unknown error occurred:", error);
+      }
     } finally {
       setIsSubmitting(false);
     }
