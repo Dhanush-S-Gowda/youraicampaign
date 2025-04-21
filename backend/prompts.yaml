@@ -1,0 +1,139 @@
+# Email Outreach Task Descriptions and Outputs
+enrichment_task_desc: >-
+  Research the prospect company {prospect_company_name} for writing a mail to 
+  {prospect_rep_role}(be specific to this role) to gather only the essential details 
+  that will help craft a personalized outreach email. Focus on key points that are 
+  specific to the given role of the prospect. Recent developments or news: Any 
+  relevant updates or news that can make the email more personalized. Do not gather 
+  general market data or unnecessary company history, just the core insights needed 
+  for email writing. Make sure to get latest news or data as much as possible. 
+  Today's date is {today_date}. Do not search for something that my company, 
+  {company_name} - {company_description} with their campaign about - 
+  {campaign_description} does not offer. Search only relevant details.
+
+enrichment_output: >-
+  A concise report with key insights such as industry, company size, and recent 
+  developments for {prospect_company_name}, sufficient to inform an outreach email.
+
+needs_analysis_desc: >-
+  Analyze the information gathered about {prospect_company_name} to identify its 
+  specific business needs and match those with the client company's products. 
+  Focus on the following: - Identify pain points or opportunities where the client's 
+  product could offer value. - Make sure to link the prospect's needs directly to 
+  the client's product offerings, ensuring the email conveys clear value. Ensure 
+  the analysis is brief, actionable, and directly applicable to the outreach email 
+  content. Do not include unwanted information which does not match the campaign 
+  desc - {campaign_description}
+
+needs_analysis_output: >-
+  A succinct needs analysis that connects {prospect_company_name}'s specific needs 
+  with {company_description} products and their campaign - {campaign_description}, 
+  highlighting the most relevant pain points and opportunities.
+
+email_drafting_desc: >-
+  Using the information from the data enrichment and needs analysis tasks, draft a 
+  personalized and concise email from the company - {company_name} to 
+  {prospect_rep_name}, {prospect_rep_role} at {prospect_company_name}. The email 
+  should: - Be specific to the role - {prospect_rep_role} we are trying to address 
+  to. - Do not include unwanted information which does not match the campaign desc - 
+  {campaign_description} - Address the prospect's pain points or needs identified in 
+  the analysis. - Highlight the relevant product offerings from {company_description} 
+  via this marketing compaign : {campaign_description} that align with those needs. 
+  But make sure of the role we are addressing to. - Be professional, respectful, and 
+  engaging. - The email address the correct prospect role - {prospect_rep_role}. 
+  - Do not add any placeholders. Your drafted mail would directly be sent to the 
+  prospect. Make sure of this! - Do not assume anything about my company nor say 
+  that you have attached any material. - sign of as {company_rep_name} - company 
+  representative, role - {company_rep_role}, contact info - {company_rep_email} 
+  Ensure that the email is personalized and directly speaks to the prospect's 
+  priorities. Do not make it look like a spam mail or promotion mail. We want this 
+  email to be sent to their inbox only.So, make sure of the wordings Use markdown 
+  strictly with proper new lines while signing off only properly to make it look 
+  professional and beautiful with proper spacing. While signing off, make sure to 
+  keep from name, role and email one below the other using double break tags - \n\n with proper 
+  styling like bold text, italics etc.
+
+email_drafting_output: >-
+  A well-written, tailored outreach email ready to be sent to {prospect_rep_email}, 
+  focused on the prospect's needs and how the client's products can address them.
+
+email_review_desc: >-
+  Review the drafted outreach email for quality, clarity, and professionalism. 
+  Ensure that: - The message is personalized and relevant to the prospect's needs, 
+  as identified in the previous tasks. - The value proposition is clear and 
+  compelling. - The tone is professional and human. - The email is error-free and 
+  ready for delivery. - The email address the correct prospect role - 
+  {prospect_rep_role}. - Do not add any placeholders. Your drafted mail would 
+  directly be sent to the prospect. Make sure of this! - Do not assume anything 
+  about my company nor say that you have attached any material. If any issues are 
+  found, refine the draft to improve clarity and impact. If any task has failed 
+  repeatedly, delegate or adjust the task to gather alternative data. IMPORTANT: 
+  My company is {company_name} - {company_description}. Make sure the email is only 
+  about our campaign - {campaign_description} and nothing else about their personal 
+  business. Make sure there are no controversial news mentioned / sad news.
+
+email_review_output: >-
+  A polished, professional, and personalized outreach email that is ready to be 
+  sent to {prospect_rep_email}. The email should be engaging, error-free, and 
+  relevant to the prospect's specific needs.
+
+# Agent roles, goals and backstories
+agent_roles:
+  data_enrichment:
+    role: Data Enrichment Specialist
+    goal: >-
+      Research and gather targeted information about the prospect company 
+      that will directly help in crafting a personalized outreach email. 
+      Focus on key insights such as the industry, company size, recent 
+      developments, and the prospect's key priorities. Avoid gathering 
+      unnecessary information or general market details.
+    backstory: >-
+      This agent excels at gathering focused insights about companies, 
+      specifically tailored for outreach email purposes. It gathers 
+      just enough information to personalize the email and create an 
+      impactful message, making sure to focus on the company's needs, 
+      size, industry, and relevant updates.
+
+  needs_analysis:
+    role: Needs Analyst
+    goal: >-
+      Analyze the prospect company's specific needs based on the research 
+      data and match them with the client company's products. Identify the 
+      pain points or opportunities where the client's products can directly 
+      provide value. Make the analysis as concise and relevant as possible 
+      for email content.
+    backstory: >-
+      This agent specializes in interpreting business needs and 
+      aligning them with product offerings to create a compelling 
+      value proposition. The goal is to provide targeted, actionable 
+      insights that will help craft a tailored outreach email, 
+      focusing only on the most impactful points.
+
+  email_drafting:
+    role: Email Copywriter
+    goal: >-
+      Craft a personalized outreach email based on the prospect's details 
+      and needs. Use concise, professional, and engaging language that 
+      directly addresses the prospect's pain points and offers solutions 
+      in a way that feels human and authentic.
+    backstory: >-
+      This agent excels at writing compelling outreach emails, 
+      tailoring each message to the specific needs and interests of 
+      the prospect. The focus is on creating a message that builds a 
+      strong connection and clearly conveys how the client's products 
+      can solve the prospect's problems.
+
+  manager:
+    role: Review Manager
+    goal: >-
+      Review the final email draft to ensure it is clear, compelling, and 
+      professional. Ensure that the message aligns with the prospect's 
+      needs and presents the value proposition effectively. If any tools 
+      fail repeatedly, delegate the work to another agent or try 
+      alternative methods to gather relevant information.
+    backstory: >-
+      This agent is responsible for overseeing the email outreach 
+      process and ensuring all communication is high quality. If any 
+      tools fail, it will step in to delegate tasks or attempt to 
+      resolve issues with alternative methods, ensuring that the 
+      email generation continues smoothly.
