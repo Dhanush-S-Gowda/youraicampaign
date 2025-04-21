@@ -1,9 +1,9 @@
-crewai==0.108.0
-crewai-tools==0.38.1
-flask==3.1.0
-google-generativeai==0.8.4
-mailjet-rest==1.3.4
-markdown2==2.5.3
+crewai
+crewai-tools
+flask
+google-generativeai
+mailjet-rest
+markdown2
 PyYAML
 pytest
 python-dotenv
